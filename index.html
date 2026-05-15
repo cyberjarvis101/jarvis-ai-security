@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JARVIS — Autonomous AI Cybersecurity Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070605;
+    --bg-2:#0c0a08;
+    --panel:#0f0d0b;
+    --line:rgba(255,140,40,.14);
+    --line-strong:rgba(255,140,40,.35);
+    --amber:#ff8c1a;
+    --amber-bright:#ffb347;
+    --amber-deep:#cc5a00;
+    --text:#f5ede2;
+    --muted:#8a8278;
+    --muted-2:#5e574e;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  body{position:relative;min-height:100vh}
+
+  a{color:inherit;text-decoration:none}
+
+  /* ---------- ATMOSPHERIC BACKGROUND ---------- */
+  .bg-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+  .bg-rays{
+    position:absolute;top:-20%;left:50%;width:140vw;height:140vh;transform:translateX(-50%);
+    background:
+      conic-gradient(from 180deg at 50% 0%,
+        transparent 0deg,
+        rgba(255,140,26,0.04) 25deg,
+        rgba(255,140,26,0.12) 45deg,
+        rgba(255,179,71,0.18) 55deg,
+        rgba(255,140,26,0.08) 70deg,
+        transparent 90deg,
+        transparent 270deg,
+        rgba(255,140,26,0.08) 290deg,
+        rgba(255,179,71,0.18) 305deg,
+        rgba(255,140,26,0.12) 315deg,
+        rgba(255,140,26,0.04) 335deg,
+        transparent 360deg);
+    filter:blur(2px);
+    animation:rays-drift 22s ease-in-out infinite alternate;
+    opacity:.7;
+  }
+  .bg-glow{
+    position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);
+    width:60vw;height:60vw;border-radius:50%;
+    background:radial-gradient(circle, rgba(255,140,26,.18) 0%, rgba(255,140,26,.04) 35%, transparent 70%);
+    filter:blur(40px);
+    animation:glow-pulse 6s ease-in-out infinite;
+  }
+  .bg-grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,140,26,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,140,26,0.04) 1px, transparent 1px);
+    background-size:60px 60px;
+    mask-image:radial-gradient(ellipse at center, black 30%, transparent 75%);
+    opacity:.5;
+  }
+  .bg-noise{
+    position:absolute;inset:0;opacity:.06;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.6'/></svg>");
+  }
+  .bg-scanline{
+    position:absolute;inset:0;
+    background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,140,26,0.025) 3px,rgba(255,140,26,0.025) 4px);
+    pointer-events:none;
+  }
+  /* Horizontal scanning line that sweeps the whole screen */
+  .bg-sweep{
+    position:absolute;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,rgba(255,140,26,.6) 30%,rgba(255,179,71,.9) 50%,rgba(255,140,26,.6) 70%,transparent);
+    box-shadow:0 0 20px rgba(255,140,26,.6), 0 0 60px rgba(255,140,26,.3);
+    animation:sweep 7s linear infinite;
+    opacity:.5;
+  }
+  @keyframes sweep{
+    0%{top:-5%}
+    100%{top:105%}
+  }
+  /* Matrix data stream canvas */
+  #matrix{
+    position:absolute;left:0;top:0;width:100%;height:100%;
+    opacity:.22;
+    mix-blend-mode:screen;
+    pointer-events:none;
+  }
+  /* Floating data packets — abstract HUD glyphs across the page */
+  .data-particles{position:absolute;inset:0;overflow:hidden}
+  .data-particle{
+    position:absolute;
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    color:var(--amber);
+    opacity:0;
+    letter-spacing:.15em;
+    white-space:nowrap;
+    text-shadow:0 0 6px rgba(255,140,26,.6);
+    animation:float-up linear infinite;
+  }
+  @keyframes float-up{
+    0%{opacity:0;transform:translateY(20px)}
+    10%{opacity:.6}
+    90%{opacity:.6}
+    100%{opacity:0;transform:translateY(-100vh)}
+  }
+  /* Crosshair targeting reticle that pulses */
+  .crosshair{
+    position:fixed;width:60px;height:60px;pointer-events:none;z-index:1;
+    opacity:.4;
+  }
+  .crosshair::before,.crosshair::after{
+    content:'';position:absolute;background:var(--amber);box-shadow:0 0 8px var(--amber);
+  }
+  .crosshair::before{left:50%;top:0;bottom:0;width:1px;transform:translateX(-50%)}
+  .crosshair::after{top:50%;left:0;right:0;height:1px;transform:translateY(-50%)}
+  .crosshair.tl{top:120px;left:30px;animation:ch-pulse 3s infinite}
+  .crosshair.br{bottom:30px;right:30px;animation:ch-pulse 3s infinite .5s}
+  @keyframes ch-pulse{
+    0%,100%{transform:scale(1);opacity:.4}
+    50%{transform:scale(1.2);opacity:.8}
+  }
+  @media (max-width:768px){.crosshair{display:none}}
+
+  @keyframes rays-drift{
+    0%{transform:translateX(-50%) rotate(-3deg) scale(1)}
+    100%{transform:translateX(-50%) rotate(3deg) scale(1.05)}
+  }
+  @keyframes glow-pulse{
+    0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}
+    50%{opacity:.9;transform:translate(-50%,-50%) scale(1.15)}
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:0 24px}
+  section{position:relative;z-index:2;padding:120px 0}
+  @media (max-width:768px){section{padding:80px 0}.wrap{padding:0 18px}}
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    background:linear-gradient(180deg,rgba(7,6,5,.95),rgba(7,6,5,.6));
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .logo{display:flex;align-items:center;gap:10px;font-family:'Syncopate',sans-serif;font-weight:700;letter-spacing:.15em;font-size:14px}
+  .logo-mark{
+    width:22px;height:22px;border:1.5px solid var(--amber);position:relative;display:flex;align-items:center;justify-content:center;
+  }
+  .logo-mark::after{content:'';width:8px;height:8px;background:var(--amber);box-shadow:0 0 12px var(--amber)}
+  .nav-links{display:flex;gap:28px;align-items:center}
+  .nav-links a{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);transition:color .2s}
+  .nav-links a:hover{color:var(--amber-bright)}
+  .nav-cta{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    padding:10px 18px;border:1px solid var(--amber);color:var(--text);
+    position:relative;background:rgba(255,140,26,.05);
+    transition:all .25s;
+  }
+  .nav-cta::before,.nav-cta::after{content:'';position:absolute;top:0;bottom:0;width:3px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+  .nav-cta::before{left:-2px}
+  .nav-cta::after{right:-2px}
+  .nav-cta:hover{background:rgba(255,140,26,.15);color:var(--amber-bright)}
+  @media (max-width:900px){.nav-links{display:none}}
+
+  /* ---------- HERO ---------- */
+  .hero{padding-top:110px;padding-bottom:80px;min-height:auto;display:flex;align-items:center}
+  .micro-label{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--amber);padding:8px 14px;border:1px solid var(--line-strong);
+    background:rgba(255,140,26,.06);
+    margin-bottom:32px;
+    opacity:0;transform:translateY(20px);
+    animation:fadeUp .8s ease forwards .1s;
+  }
+  .micro-label .dot{width:6px;height:6px;background:var(--amber);border-radius:50%;box-shadow:0 0 8px var(--amber);animation:blink 1.4s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+  .hero h1{
+    font-family:'Syncopate',sans-serif;font-weight:700;
+    font-size:clamp(38px,7vw,82px);line-height:1.02;letter-spacing:-.01em;
+    margin-bottom:28px;
+    opacity:0;transform:translateY(30px);
+    animation:fadeUp 1s ease forwards .25s;
+    position:relative;
+  }
+  /* Subtle bracket marks around the accent line */
+  .hero h1 .accent{
+    position:relative;display:inline-block;padding:0 .15em;
+    background:linear-gradient(180deg,#fff 0%,var(--amber-bright) 55%,var(--amber-deep) 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 0 30px rgba(255,140,26,.35));
+  }
+  /* A slow ambient sheen passing through the accent text */
+  .hero h1 .accent::after{
+    content:attr(data-text);position:absolute;left:.15em;top:0;width:calc(100% - .3em);height:100%;
+    background:linear-gradient(110deg, transparent 35%, rgba(255,255,255,.55) 50%, transparent 65%);
+    background-size:200% 100%;
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    animation:sheen 7s ease-in-out infinite;
+    pointer-events:none;
+  }
+  /* Decorative tick marks at the start/end of the accent line */
+  .hero h1 .accent::before{
+    content:'';position:absolute;left:-4px;top:8%;width:2px;height:84%;
+    background:var(--amber);box-shadow:0 0 10px var(--amber);
+    opacity:.9;
+  }
+  /* Small framing brackets attached to the headline block */
+  .hero-headline-wrap{position:relative;display:inline-block;padding:14px 0 14px 22px}
+  .hero-headline-wrap::before{
+    content:'';position:absolute;left:0;top:0;width:10px;height:18px;
+    border-left:1.5px solid var(--amber);border-top:1.5px solid var(--amber);
+    box-shadow:-1px -1px 8px rgba(255,140,26,.4);
+  }
+  .hero-headline-wrap::after{
+    content:'';position:absolute;left:0;bottom:0;width:10px;height:18px;
+    border-left:1.5px solid var(--amber);border-bottom:1.5px solid var(--amber);
+    box-shadow:-1px 1px 8px rgba(255,140,26,.4);
+  }
+  /* Small mono label above headline */
+  .hero-coord{
+    position:absolute;left:22px;top:-22px;
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.25em;
+    color:var(--muted-2);
+  }
+  .hero-coord span{color:var(--amber)}
+  @keyframes sheen{
+    0%,100%{background-position:200% 0%;opacity:0}
+    40%,60%{background-position:-100% 0%;opacity:.9}
+  }
+  .hero-sub{
+    max-width:620px;font-size:18px;line-height:1.65;color:var(--muted);margin-bottom:40px;
+    opacity:0;transform:translateY(20px);
+    animation:fadeUp .9s ease forwards .45s;
+  }
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;opacity:0;animation:fadeUp .9s ease forwards .6s}
+
+  .btn{
+    position:relative;display:inline-flex;align-items:center;gap:10px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;
+    padding:16px 26px;cursor:pointer;border:none;background:transparent;color:var(--text);
+    transition:all .25s;
+  }
+  .btn-primary{background:rgba(255,140,26,.08);border:1px solid var(--amber)}
+  .btn-primary::before,.btn-primary::after{
+    content:'';position:absolute;top:-1px;bottom:-1px;width:4px;background:var(--amber);box-shadow:0 0 12px var(--amber);
+  }
+  .btn-primary::before{left:-2px}.btn-primary::after{right:-2px}
+  .btn-primary:hover{background:rgba(255,140,26,.18);transform:translateY(-2px)}
+
+  .btn-ghost{border:1px solid var(--line-strong);color:var(--muted)}
+  .btn-ghost:hover{border-color:var(--amber);color:var(--text);background:rgba(255,140,26,.04)}
+
+  .btn .arrow{transition:transform .25s}
+  .btn:hover .arrow{transform:translateX(4px)}
+
+  .trust-line{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--muted-2);
+    opacity:0;animation:fadeUp .9s ease forwards .8s;
+  }
+
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+
+  /* HERO HUD ORNAMENT */
+  .hero-hud{
+    position:absolute;right:24px;top:95px;
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--amber);
+    text-align:right;opacity:.7;
+    animation:fadeUp 1s ease forwards .8s;
+  }
+  .hero-hud .row{display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-bottom:6px}
+  .hero-hud .bar{width:40px;height:6px;border:1px solid var(--line-strong);position:relative;overflow:hidden}
+  .hero-hud .bar::after{content:'';position:absolute;inset:0;background:var(--amber);box-shadow:0 0 8px var(--amber);animation:scan 2s ease-in-out infinite}
+  @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+  @media (max-width:900px){.hero-hud{display:none}}
+
+  /* CORNER FRAME */
+  .corner-frame{position:absolute;width:18px;height:18px;border:1.5px solid var(--amber)}
+  .cf-tl{top:0;left:0;border-right:none;border-bottom:none}
+  .cf-tr{top:0;right:0;border-left:none;border-bottom:none}
+  .cf-bl{bottom:0;left:0;border-right:none;border-top:none}
+  .cf-br{bottom:0;right:0;border-left:none;border-top:none}
+
+  /* ---------- SECTION HEADER ---------- */
+  .sec-label{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--amber);margin-bottom:20px;display:inline-flex;align-items:center;gap:10px;
+  }
+  .sec-label::before{content:'';width:24px;height:1px;background:var(--amber);box-shadow:0 0 6px var(--amber)}
+  .sec-h{
+    font-family:'Syncopate',sans-serif;font-weight:700;
+    font-size:clamp(32px,5vw,56px);line-height:1.05;letter-spacing:-.01em;margin-bottom:24px;
+  }
+  .sec-copy{font-size:17px;line-height:1.7;color:var(--muted);max-width:680px;margin-bottom:60px}
+
+  /* ---------- MORNING BRIEFING ---------- */
+  .briefing-block{position:relative}
+  .briefing-panel{
+    position:relative;background:linear-gradient(180deg,rgba(15,13,11,.95),rgba(8,7,6,.95));
+    border:1px solid var(--line-strong);
+    padding:48px 40px;max-width:720px;margin:40px auto 0;
+    box-shadow:0 0 80px rgba(255,140,26,.08), inset 0 0 60px rgba(255,140,26,.03);
+  }
+  .briefing-panel::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:linear-gradient(180deg,transparent,var(--amber) 20%,var(--amber) 80%,transparent);
+    box-shadow:0 0 12px var(--amber);
+  }
+  .briefing-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted)}
+  .briefing-meta .live{color:var(--amber);display:inline-flex;align-items:center;gap:8px}
+  .briefing-meta .live .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);animation:blink 1.2s infinite}
+  .greeting{font-family:'Syncopate',sans-serif;font-size:22px;letter-spacing:.02em;margin-bottom:6px}
+  .greeting-sub{color:var(--muted);font-size:14px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;margin-bottom:32px}
+  .briefing-list{list-style:none;display:flex;flex-direction:column;gap:14px;margin-bottom:32px}
+  .briefing-item{
+    display:flex;align-items:center;gap:16px;padding:14px 18px;
+    background:rgba(255,140,26,.04);border:1px solid var(--line);
+    font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.04em;
+    opacity:0;transform:translateX(-12px);
+  }
+  .briefing-item.in{animation:slideIn .5s ease forwards}
+  @keyframes slideIn{to{opacity:1;transform:translateX(0)}}
+  .briefing-num{font-size:22px;color:var(--amber-bright);font-weight:600;min-width:42px;text-shadow:0 0 12px var(--amber)}
+  .briefing-text{color:var(--text)}
+  .briefing-status{
+    margin-left:auto;font-size:10px;color:var(--amber);letter-spacing:.2em;
+    padding:4px 8px;border:1px solid var(--line-strong);background:rgba(255,140,26,.06)
+  }
+  .briefing-footer{font-family:'Syncopate',sans-serif;font-size:14px;letter-spacing:.15em;color:var(--amber);text-align:center;padding-top:24px;border-top:1px solid var(--line)}
+  .briefing-cta{display:flex;justify-content:center;margin-top:40px}
+
+  /* ---------- PROBLEM CARDS ---------- */
+  .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  @media (max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+  @media (min-width:901px) and (max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
+
+  .card{
+    position:relative;padding:32px 28px;
+    background:linear-gradient(180deg,rgba(15,13,11,.6),rgba(10,8,7,.6));
+    border:1px solid var(--line);
+    transition:all .35s;
+    overflow:hidden;
+  }
+  .card::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(circle at 0% 0%,rgba(255,140,26,.08),transparent 50%);
+    opacity:0;transition:opacity .35s;
+  }
+  .card:hover{border-color:var(--line-strong);transform:translateY(-4px)}
+  .card:hover::before{opacity:1}
+  .card .icon{
+    width:42px;height:42px;border:1px solid var(--amber);display:flex;align-items:center;justify-content:center;
+    margin-bottom:24px;color:var(--amber);background:rgba(255,140,26,.06);
+  }
+  .card h3{font-family:'Syncopate',sans-serif;font-size:14px;letter-spacing:.05em;margin-bottom:14px;line-height:1.35}
+  .card p{font-size:14px;line-height:1.65;color:var(--muted)}
+  .card .num{
+    position:absolute;top:18px;right:20px;
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;color:var(--muted-2);
+  }
+
+  /* ---------- HOW IT WORKS / STEPS ---------- */
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;margin-top:60px}
+  @media (max-width:900px){.steps{grid-template-columns:1fr}}
+  .step{
+    position:relative;padding:32px 24px;border:1px solid var(--line);border-right:none;
+    background:linear-gradient(180deg,rgba(15,13,11,.5),rgba(10,8,7,.4));
+    transition:all .3s;
+  }
+  .step:last-child{border-right:1px solid var(--line)}
+  @media (max-width:900px){
+    .step{border-right:1px solid var(--line);border-bottom:none}
+    .step:last-child{border-bottom:1px solid var(--line)}
+  }
+  .step:hover{background:rgba(255,140,26,.04)}
+  .step-num{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--amber);margin-bottom:18px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .step-num::after{content:'';flex:1;height:1px;background:var(--line)}
+  .step h3{font-family:'Syncopate',sans-serif;font-size:18px;letter-spacing:.04em;margin-bottom:12px}
+  .step p{font-size:13px;line-height:1.65;color:var(--muted)}
+
+  /* ---------- SOLUTION MODULES ---------- */
+  .modules{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:50px}
+  @media (max-width:780px){.modules{grid-template-columns:1fr}}
+  .module{
+    position:relative;padding:36px 32px;
+    background:linear-gradient(180deg,rgba(15,13,11,.7),rgba(10,8,7,.7));
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .module::after{
+    content:'';position:absolute;top:0;left:0;width:100%;height:1px;
+    background:linear-gradient(90deg,transparent,var(--amber),transparent);
+    opacity:0;transition:opacity .4s;
+  }
+  .module:hover::after{opacity:1}
+  .module-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;color:var(--amber);margin-bottom:16px}
+  .module h3{font-family:'Syncopate',sans-serif;font-size:22px;letter-spacing:.02em;margin-bottom:14px}
+  .module p{font-size:15px;line-height:1.65;color:var(--muted)}
+  .module .radar-bg{
+    position:absolute;right:-40px;bottom:-40px;width:180px;height:180px;opacity:.12;pointer-events:none;
+  }
+
+  /* ---------- WHY IT MATTERS ---------- */
+  .why-block{margin-top:50px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media (max-width:900px){.why-block{grid-template-columns:1fr}}
+  .why-card{padding:32px 28px;border:1px solid var(--line);background:rgba(15,13,11,.5);position:relative}
+  .why-card .corner-frame{width:14px;height:14px}
+  .why-card h3{font-family:'Syncopate',sans-serif;font-size:16px;letter-spacing:.04em;margin-bottom:14px;color:var(--amber-bright)}
+  .why-card p{font-size:14px;line-height:1.65;color:var(--muted)}
+
+  /* ---------- ROADMAP ---------- */
+  .roadmap{margin-top:60px;position:relative}
+  .roadmap-line{
+    position:absolute;left:32px;top:0;bottom:0;width:1px;
+    background:linear-gradient(180deg,var(--amber),var(--line),var(--amber));
+  }
+  .phase{
+    position:relative;padding:24px 24px 24px 80px;margin-bottom:20px;
+    border:1px solid var(--line);background:rgba(15,13,11,.5);
+    transition:all .3s;
+  }
+  .phase:hover{border-color:var(--line-strong);background:rgba(255,140,26,.04)}
+  .phase-marker{
+    position:absolute;left:18px;top:32px;width:28px;height:28px;
+    border:2px solid var(--amber);background:var(--bg);display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);font-weight:600;
+    box-shadow:0 0 12px rgba(255,140,26,.4);
+  }
+  .phase-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;color:var(--amber);margin-bottom:8px}
+  .phase h3{font-family:'Syncopate',sans-serif;font-size:18px;letter-spacing:.03em;margin-bottom:10px}
+  .phase p{font-size:14px;line-height:1.65;color:var(--muted)}
+
+  /* ---------- WAITLIST ---------- */
+  .waitlist-wrap{
+    max-width:580px;margin:50px auto 0;
+    background:linear-gradient(180deg,rgba(15,13,11,.85),rgba(8,7,6,.95));
+    border:1px solid var(--line-strong);padding:48px 40px;position:relative;
+    box-shadow:0 0 80px rgba(255,140,26,.1);
+  }
+  .waitlist-form{display:flex;flex-direction:column;gap:14px;margin-top:24px}
+  .field{
+    background:rgba(255,140,26,.04);border:1px solid var(--line);
+    padding:16px 18px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;
+    letter-spacing:.04em;transition:all .25s;outline:none;
+  }
+  .field::placeholder{color:var(--muted-2);text-transform:uppercase;letter-spacing:.2em;font-size:11px}
+  .field:focus{border-color:var(--amber);background:rgba(255,140,26,.08);box-shadow:0 0 0 1px var(--amber)}
+  .waitlist-form .btn-primary{justify-content:center;margin-top:6px}
+  .waitlist-foot{font-size:13px;color:var(--muted);text-align:center;margin-top:22px;line-height:1.6}
+  .waitlist-foot a{color:var(--amber);border-bottom:1px solid var(--line-strong);padding-bottom:1px}
+  .waitlist-foot a:hover{color:var(--amber-bright)}
+
+  /* ---------- FINAL CTA ---------- */
+  .final{text-align:center;padding:140px 0}
+  .final h2{font-family:'Syncopate',sans-serif;font-size:clamp(28px,4.5vw,46px);line-height:1.15;letter-spacing:-.005em;max-width:880px;margin:0 auto 40px}
+  .final .cta-row{justify-content:center}
+
+  /* ---------- FOOTER ---------- */
+  footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted-2);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;position:relative;z-index:2}
+  .foot-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
+
+  /* ---------- REVEAL ON SCROLL ---------- */
+  .reveal{opacity:0;transform:translateY(30px);transition:opacity .9s ease, transform .9s ease}
+  .reveal.in{opacity:1;transform:translateY(0)}
+  .reveal-stagger > *{opacity:0;transform:translateY(20px);transition:opacity .7s ease, transform .7s ease}
+  .reveal-stagger.in > *{opacity:1;transform:translateY(0)}
+  .reveal-stagger.in > *:nth-child(1){transition-delay:.05s}
+  .reveal-stagger.in > *:nth-child(2){transition-delay:.15s}
+  .reveal-stagger.in > *:nth-child(3){transition-delay:.25s}
+  .reveal-stagger.in > *:nth-child(4){transition-delay:.35s}
+
+  /* ---------- TICKER ---------- */
+  .ticker{
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    background:rgba(255,140,26,.03);padding:12px 0;overflow:hidden;position:relative;z-index:2;
+  }
+  .ticker-track{display:flex;gap:50px;white-space:nowrap;animation:tick 35s linear infinite}
+  .ticker-item{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:14px}
+  .ticker-item .pip{width:6px;height:6px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+  @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+</style>
+</head>
+<body>
+
+<!-- ATMOSPHERIC BACKGROUND -->
+<div class="bg-layer">
+  <div class="bg-grid"></div>
+  <div class="bg-rays"></div>
+  <div class="bg-glow"></div>
+  <div class="bg-noise"></div>
+  <div class="bg-scanline"></div>
+</div>
+
+<!-- Floating HUD crosshairs -->
+<div class="crosshair tl"></div>
+<div class="crosshair br"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark"></span>
+      <span>JARVIS</span>
+    </a>
+    <div class="nav-links">
+      <a href="#vision">Vision</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#solution">Protection Layers</a>
+      <a href="#waitlist">Waitlist</a>
+      <a href="/startup">Startup</a>
+    </div>
+    <a href="/startup" class="nav-cta">Back Startup</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-hud">
+    <div class="row"><span>SYS_STATUS</span><span class="bar"></span></div>
+    <div class="row"><span>AGENT.JARVIS</span><span style="color:var(--amber-bright)">ONLINE</span></div>
+    <div class="row"><span>v0.1 — PRE-LAUNCH</span></div>
+  </div>
+  <div class="wrap">
+    <div class="micro-label"><span class="dot"></span>AUTONOMOUS AI CYBERSECURITY AGENT</div>
+    <div class="hero-headline-wrap">
+      <div class="hero-coord"><span>◢</span> CLASSIFIED // 0x774-B</div>
+      <h1>
+        Your Company's<br>
+        <span class="accent" data-text="AI Security Agent.">AI Security Agent.</span><br>
+        Working 24/7.
+      </h1>
+    </div>
+    <p class="hero-sub">
+      Jarvis AI Security is being built to detect threats, block attacks, remove malicious emails, monitor suspicious access, and respond automatically — so businesses stay protected even while they sleep.
+    </p>
+    <div class="cta-row">
+      <a href="/startup" class="btn btn-primary">Back the Startup <span class="arrow">→</span></a>
+      <a href="#waitlist" class="btn btn-ghost">Join the Waitlist <span class="arrow">→</span></a>
+    </div>
+    <div class="trust-line">// PRE-LAUNCH — BUILT FOR BUSINESSES THAT WANT AUTONOMOUS PROTECTION, NOT MORE DASHBOARDS</div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="pip"></span>WEBSITE DEFENSE</span>
+    <span class="ticker-item"><span class="pip"></span>EMAIL GUARD</span>
+    <span class="ticker-item"><span class="pip"></span>IDENTITY WATCH</span>
+    <span class="ticker-item"><span class="pip"></span>AUTONOMOUS RESPONSE</span>
+    <span class="ticker-item"><span class="pip"></span>DAILY BRIEFINGS</span>
+    <span class="ticker-item"><span class="pip"></span>INFRASTRUCTURE SIGNALS</span>
+    <span class="ticker-item"><span class="pip"></span>WEBSITE DEFENSE</span>
+    <span class="ticker-item"><span class="pip"></span>EMAIL GUARD</span>
+    <span class="ticker-item"><span class="pip"></span>IDENTITY WATCH</span>
+    <span class="ticker-item"><span class="pip"></span>AUTONOMOUS RESPONSE</span>
+    <span class="ticker-item"><span class="pip"></span>DAILY BRIEFINGS</span>
+    <span class="ticker-item"><span class="pip"></span>INFRASTRUCTURE SIGNALS</span>
+  </div>
+</div>
+
+<!-- MORNING BRIEFING -->
+<section id="vision">
+  <div class="wrap briefing-block">
+    <div class="reveal">
+      <div class="sec-label">Morning Security Briefing</div>
+      <h2 class="sec-h">Wake up to a<br><span style="color:var(--amber-bright)">protected business.</span></h2>
+      <p class="sec-copy">
+        Jarvis is designed to work while you don't. Instead of opening five security dashboards, business leaders receive one clear briefing: what happened, what Jarvis stopped, and whether any action is needed.
+      </p>
+    </div>
+
+    <div class="briefing-panel reveal">
+      <div class="corner-frame cf-tl"></div>
+      <div class="corner-frame cf-tr"></div>
+      <div class="corner-frame cf-bl"></div>
+      <div class="corner-frame cf-br"></div>
+      <div class="briefing-meta">
+        <span>BRIEFING_07:00</span>
+        <span class="live"><span class="dot"></span>LIVE TRANSMISSION</span>
+      </div>
+      <div class="greeting">Good morning, sir.</div>
+      <div class="greeting-sub">Your business was protected overnight.</div>
+      <ul class="briefing-list" id="brief-list">
+        <li class="briefing-item" data-delay="0"><span class="briefing-num">28</span><span class="briefing-text">website attacks blocked</span><span class="briefing-status">BLOCKED</span></li>
+        <li class="briefing-item" data-delay="200"><span class="briefing-num">01</span><span class="briefing-text">phishing email removed</span><span class="briefing-status">REMOVED</span></li>
+        <li class="briefing-item" data-delay="400"><span class="briefing-num">03</span><span class="briefing-text">suspicious login attempts stopped</span><span class="briefing-status">STOPPED</span></li>
+        <li class="briefing-item" data-delay="600"><span class="briefing-num">01</span><span class="briefing-text">security rule updated automatically</span><span class="briefing-status">AUTO</span></li>
+      </ul>
+      <div class="briefing-footer">// NO ACTION REQUIRED</div>
+    </div>
+
+    <div class="briefing-cta reveal">
+      <a href="#waitlist" class="btn btn-primary">Join the Founding Waitlist <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="sec-label">The Jarvis Model</div>
+      <h2 class="sec-h">One AI agent.<br><span style="color:var(--amber-bright)">Multiple protection layers.</span></h2>
+      <p class="sec-copy">
+        Jarvis is being built as a unified autonomous defense layer for the modern business. Instead of treating website security, email security, identity risk, and infrastructure signals as disconnected problems, Jarvis is designed to understand the full picture and act intelligently.
+      </p>
+    </div>
+    <div class="modules reveal-stagger">
+      <div class="module">
+        <div class="corner-frame cf-tl"></div>
+        <div class="corner-frame cf-br"></div>
+        <div class="module-tag">// MODULE_01 — WEB</div>
+        <h3>Website Defense</h3>
+        <p>Detect malicious traffic, attack patterns, exploit attempts, bots, and suspicious requests in real time.</p>
+        <svg class="radar-bg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="40" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="70" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="100" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/></svg>
+      </div>
+      <div class="module">
+        <div class="corner-frame cf-tl"></div>
+        <div class="corner-frame cf-br"></div>
+        <div class="module-tag">// MODULE_02 — EMAIL</div>
+        <h3>Email Guard</h3>
+        <p>Identify phishing, dangerous attachments, spoofing attempts, and malicious inbound messages before they create damage.</p>
+        <svg class="radar-bg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="40" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="70" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="100" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/></svg>
+      </div>
+      <div class="module">
+        <div class="corner-frame cf-tl"></div>
+        <div class="corner-frame cf-br"></div>
+        <div class="module-tag">// MODULE_03 — IDENTITY</div>
+        <h3>Identity Watch</h3>
+        <p>Monitor suspicious login behavior, unusual access attempts, and risk signals around company identities.</p>
+        <svg class="radar-bg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="40" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="70" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="100" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/></svg>
+      </div>
+      <div class="module">
+        <div class="corner-frame cf-tl"></div>
+        <div class="corner-frame cf-br"></div>
+        <div class="module-tag">// MODULE_04 — RESPONSE</div>
+        <h3>Autonomous Response</h3>
+        <p>Block, quarantine, escalate, or report high-confidence threats automatically — with plain-English clarity.</p>
+        <svg class="radar-bg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="40" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="70" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/><circle cx="100" cy="100" r="100" fill="none" stroke="#ff8c1a" stroke-dasharray="2 4"/></svg>
+      </div>
+    </div>
+    <div style="margin-top:40px" class="reveal">
+      <a href="#how-it-works" class="btn btn-ghost">See How Jarvis Works <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="sec-label">Operating Model</div>
+      <h2 class="sec-h">How Jarvis is designed<br>to protect a company.</h2>
+    </div>
+    <div class="steps reveal-stagger">
+      <div class="step">
+        <div class="step-num">STEP_01</div>
+        <h3>Connect</h3>
+        <p>Companies connect their website, email environment, and selected business security layers.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP_02</div>
+        <h3>Observe</h3>
+        <p>Jarvis continuously analyzes threat signals across the connected environment.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP_03</div>
+        <h3>Respond</h3>
+        <p>High-confidence threats can be blocked, quarantined, or escalated automatically.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">STEP_04</div>
+        <h3>Brief</h3>
+        <p>Each morning, Jarvis summarizes what happened in a clear daily security report.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BIG VISION / ROADMAP -->
+<section>
+  <div class="wrap">
+    <div class="reveal">
+      <div class="sec-label">The Bigger Vision</div>
+      <h2 class="sec-h">From protecting websites<br>to protecting <span style="color:var(--amber-bright)">entire companies.</span></h2>
+      <p class="sec-copy">
+        Jarvis may begin with the most immediate digital risk surfaces, but the larger vision is far bigger: an AI cybersecurity agent that becomes the autonomous defense layer for modern companies.
+      </p>
+    </div>
+    <div class="roadmap reveal-stagger">
+      <div class="roadmap-line"></div>
+      <div class="phase">
+        <div class="phase-marker">01</div>
+        <div class="phase-tag">// PHASE_01</div>
+        <h3>Website Protection</h3>
+        <p>Web attack detection, malicious traffic analysis, automated defensive action.</p>
+      </div>
+      <div class="phase">
+        <div class="phase-marker">02</div>
+        <div class="phase-tag">// PHASE_02</div>
+        <h3>Email + Identity</h3>
+        <p>Phishing removal, suspicious login monitoring, account-risk detection.</p>
+      </div>
+      <div class="phase">
+        <div class="phase-marker">03</div>
+        <div class="phase-tag">// PHASE_03</div>
+        <h3>Infrastructure Awareness</h3>
+        <p>Cloud signals, connected business systems, broader security context.</p>
+      </div>
+      <div class="phase">
+        <div class="phase-marker">04</div>
+        <div class="phase-tag">// PHASE_04</div>
+        <h3>Autonomous Business Defense</h3>
+        <p>A full AI security agent that helps protect the company around the clock.</p>
+      </div>
+    </div>
+    <div style="margin-top:40px" class="reveal">
+      <a href="/startup" class="btn btn-primary">Back the Startup <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section id="waitlist">
+  <div class="wrap" style="text-align:center">
+    <div class="reveal">
+      <div class="sec-label" style="justify-content:center">Early Access</div>
+      <h2 class="sec-h">Join the founding waitlist.</h2>
+      <p class="sec-copy" style="margin-left:auto;margin-right:auto;text-align:center">
+        Be among the first to follow Jarvis AI Security as we build a new category of autonomous cybersecurity protection for companies.
+      </p>
+    </div>
+    <div class="waitlist-wrap reveal">
+      <div class="corner-frame cf-tl"></div>
+      <div class="corner-frame cf-tr"></div>
+      <div class="corner-frame cf-bl"></div>
+      <div class="corner-frame cf-br"></div>
+      <div class="briefing-meta">
+        <span>WAITLIST_REGISTRATION</span>
+        <span class="live"><span class="dot"></span>OPEN</span>
+      </div>
+      <form class="waitlist-form" onsubmit="event.preventDefault();submitWaitlist(this);">
+        <input class="field" type="email" placeholder="Email Address" required />
+        <input class="field" type="text" placeholder="Company / Role (optional)" />
+        <button class="btn btn-primary" type="submit">Join the Waitlist <span class="arrow">→</span></button>
+      </form>
+      <div class="waitlist-foot">
+        Founders, investors, cybersecurity experts, engineers, and future design partners are welcome.<br><br>
+        <a href="/startup">Back the Startup →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final">
+  <div class="wrap reveal">
+    <div class="sec-label" style="justify-content:center">// END_TRANSMISSION</div>
+    <h2>The future of cybersecurity is not another dashboard.<br><span style="color:var(--amber-bright)">It is an AI agent that protects the business.</span></h2>
+    <div class="cta-row">
+      <a href="/startup" class="btn btn-primary">Back the Startup <span class="arrow">→</span></a>
+      <a href="#waitlist" class="btn btn-ghost">Join the Waitlist <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-inner">
+    <span>© JARVIS AI SECURITY — PRE-LAUNCH</span>
+    <span>// AUTONOMOUS DEFENSE LAYER</span>
+  </div>
+</footer>
+
+<script>
+  // ----------- REVEAL ON SCROLL -----------
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        if(e.target.id==='brief-list' || e.target.closest('#brief-list')){
+          // handled separately
+        }
+      }
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el=>io.observe(el));
+
+  // ----------- BRIEFING LIST STAGGER -----------
+  const briefIO = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const items = e.target.querySelectorAll('.briefing-item');
+        items.forEach(it=>{
+          const d = parseInt(it.dataset.delay||0);
+          setTimeout(()=>it.classList.add('in'), d);
+        });
+        briefIO.unobserve(e.target);
+      }
+    });
+  },{threshold:.3});
+  const bl = document.getElementById('brief-list');
+  if(bl) briefIO.observe(bl);
+
+  // ----------- WAITLIST SUBMIT -----------
+  function submitWaitlist(form){
+    const btn = form.querySelector('button');
+    const original = btn.innerHTML;
+    btn.innerHTML = '// TRANSMITTING...';
+    btn.style.pointerEvents='none';
+    setTimeout(()=>{
+      btn.innerHTML = '✓ TRANSMISSION RECEIVED';
+      btn.style.color='var(--amber-bright)';
+      form.querySelectorAll('input').forEach(i=>i.value='');
+      setTimeout(()=>{
+        btn.innerHTML = original;
+        btn.style.pointerEvents='auto';
+        btn.style.color='';
+      },2800);
+    },900);
+  }
+
+  // ----------- SUBTLE PARALLAX ON BG -----------
+  const glow = document.querySelector('.bg-glow');
+  let ticking = false;
+  window.addEventListener('scroll', ()=>{
+    if(!ticking){
+      requestAnimationFrame(()=>{
+        const y = window.scrollY;
+        if(glow) glow.style.transform = `translate(-50%, calc(-50% + ${y*0.15}px))`;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+</script>
+
+</body>
+</html>
