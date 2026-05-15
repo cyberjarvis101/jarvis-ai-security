@@ -486,6 +486,53 @@
   .reveal-stagger.in > *:nth-child(3){transition-delay:.25s}
   .reveal-stagger.in > *:nth-child(4){transition-delay:.35s}
 
+  /* ---------- VOICE TRIGGER BUTTON ---------- */
+  .voice-btn{
+    display:inline-flex;align-items:center;gap:14px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    padding:14px 22px;cursor:pointer;border:1px solid var(--amber);
+    background:linear-gradient(90deg, rgba(255,140,26,.08), rgba(255,140,26,.04));
+    color:var(--text);position:relative;transition:all .25s;margin-top:18px;
+  }
+  .voice-btn::before,.voice-btn::after{
+    content:'';position:absolute;top:-1px;bottom:-1px;width:3px;background:var(--amber);box-shadow:0 0 10px var(--amber);
+  }
+  .voice-btn::before{left:-2px}.voice-btn::after{right:-2px}
+  .voice-btn:hover{background:rgba(255,140,26,.15);transform:translateY(-1px)}
+  .voice-btn .v-icon{
+    width:26px;height:26px;border:1.5px solid var(--amber);display:flex;align-items:center;justify-content:center;
+    color:var(--amber);position:relative;
+  }
+  .voice-btn .v-icon svg{width:11px;height:11px}
+  .voice-btn.playing .v-icon{background:var(--amber);color:var(--bg)}
+  .voice-btn .v-label{display:flex;flex-direction:column;gap:3px;align-items:flex-start;line-height:1}
+  .voice-btn .v-main{font-weight:600;color:var(--text)}
+  .voice-btn .v-sub{font-size:9px;letter-spacing:.18em;color:var(--amber);opacity:.8}
+
+  /* Equalizer bars when playing */
+  .voice-eq{display:none;gap:2px;align-items:flex-end;height:14px;margin-left:6px}
+  .voice-btn.playing .voice-eq{display:inline-flex}
+  .voice-eq span{display:block;width:2px;background:var(--amber);box-shadow:0 0 4px var(--amber);animation:eq 1s ease-in-out infinite}
+  .voice-eq span:nth-child(1){animation-delay:0s}
+  .voice-eq span:nth-child(2){animation-delay:.15s}
+  .voice-eq span:nth-child(3){animation-delay:.3s}
+  .voice-eq span:nth-child(4){animation-delay:.45s}
+  @keyframes eq{0%,100%{height:3px}50%{height:14px}}
+
+  /* Pulsing dot when idle */
+  .voice-btn:not(.playing) .v-icon::after{
+    content:'';position:absolute;inset:-1px;border:1px solid var(--amber);
+    animation:vpulse 2s ease-out infinite;opacity:0;
+  }
+  @keyframes vpulse{
+    0%{transform:scale(1);opacity:.8}
+    100%{transform:scale(1.6);opacity:0}
+  }
+
+  /* Briefing voice button — centered variant */
+  .voice-btn-center{margin:0 auto 30px;display:inline-flex}
+  .voice-btn-wrap{text-align:center;margin-bottom:20px}
+
   /* ---------- TICKER ---------- */
   .ticker{
     border-top:1px solid var(--line);border-bottom:1px solid var(--line);
@@ -512,6 +559,9 @@
 <!-- Floating HUD crosshairs -->
 <div class="crosshair tl"></div>
 <div class="crosshair br"></div>
+
+<!-- Jarvis voice audio -->
+<audio id="jarvis-audio" preload="auto" src="jarvis-voice.mp3"></audio>
 
 <!-- NAV -->
 <nav class="nav">
@@ -556,6 +606,16 @@
       <a href="#waitlist" class="btn btn-ghost">Join the Waitlist <span class="arrow">→</span></a>
     </div>
     <div class="trust-line">// PRE-LAUNCH — BUILT FOR BUSINESSES THAT WANT AUTONOMOUS PROTECTION, NOT MORE DASHBOARDS</div>
+    <button class="voice-btn" data-voice-trigger aria-label="Play Jarvis voice transmission">
+      <span class="v-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+      <span class="v-label">
+        <span class="v-main">Hear Jarvis Speak</span>
+        <span class="v-sub">// INITIATE VOICE TRANSMISSION</span>
+      </span>
+      <span class="voice-eq"><span></span><span></span><span></span><span></span></span>
+    </button>
   </div>
 </section>
 
@@ -586,6 +646,19 @@
       <p class="sec-copy">
         Jarvis is designed to work while you don't. Instead of opening five security dashboards, business leaders receive one clear briefing: what happened, what Jarvis stopped, and whether any action is needed.
       </p>
+    </div>
+
+    <div class="voice-btn-wrap reveal">
+      <button class="voice-btn voice-btn-center" data-voice-trigger aria-label="Play Jarvis voice transmission">
+        <span class="v-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </span>
+        <span class="v-label">
+          <span class="v-main">Listen to the Briefing</span>
+          <span class="v-sub">// JARVIS // VOICE TRANSMISSION</span>
+        </span>
+        <span class="voice-eq"><span></span><span></span><span></span><span></span></span>
+      </button>
     </div>
 
     <div class="briefing-panel reveal">
@@ -838,7 +911,51 @@
     },900);
   }
 
-  // ----------- SUBTLE PARALLAX ON BG -----------
+  // ----------- JARVIS VOICE TRIGGER -----------
+  (function(){
+    const audio = document.getElementById('jarvis-audio');
+    const buttons = document.querySelectorAll('[data-voice-trigger]');
+    if(!audio || !buttons.length) return;
+
+    function setPlayingState(isPlaying){
+      buttons.forEach(btn => {
+        btn.classList.toggle('playing', isPlaying);
+        const main = btn.querySelector('.v-main');
+        const sub = btn.querySelector('.v-sub');
+        const icon = btn.querySelector('.v-icon svg path');
+        if(isPlaying){
+          if(main) main.textContent = main.dataset.playing || 'Transmission Active';
+          if(icon) icon.setAttribute('d','M6 5h4v14H6zM14 5h4v14h-4z'); // pause icon
+        } else {
+          if(main) main.textContent = main.dataset.original;
+          if(icon) icon.setAttribute('d','M8 5v14l11-7z'); // play icon
+        }
+      });
+    }
+
+    // Store original labels and set hover labels
+    buttons.forEach(btn => {
+      const main = btn.querySelector('.v-main');
+      if(main){
+        main.dataset.original = main.textContent;
+        main.dataset.playing = 'Transmission Active';
+      }
+      btn.addEventListener('click', () => {
+        if(audio.paused){
+          audio.play().catch(err => console.log('Play prevented:', err));
+        } else {
+          audio.pause();
+        }
+      });
+    });
+
+    audio.addEventListener('play', () => setPlayingState(true));
+    audio.addEventListener('pause', () => setPlayingState(false));
+    audio.addEventListener('ended', () => {
+      setPlayingState(false);
+      audio.currentTime = 0;
+    });
+  })();
   const glow = document.querySelector('.bg-glow');
   let ticking = false;
   window.addEventListener('scroll', ()=>{
