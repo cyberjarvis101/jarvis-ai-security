@@ -204,6 +204,36 @@ footer a{color:var(--amber)}
   .perk-bottom{flex-direction:column;align-items:flex-start}
   .perk-btn{width:100%;text-align:center}
 }
+
+/* ---------- MOBILE SLIDE FIX ---------- */
+@media(max-width:768px){
+  .story-section{
+    padding-top:40px;
+  }
+
+  .story-section .container{
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  .slide-block{
+    margin-bottom:46px;
+  }
+
+  .slide-block img{
+    width:calc(100vw - 16px);
+    max-width:none;
+    margin-left:50%;
+    transform:translateX(-50%);
+    margin-bottom:18px;
+  }
+
+  .slide-caption{
+    font-size:16px;
+    line-height:1.75;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -230,7 +260,7 @@ footer a{color:var(--amber)}
   <div class="hero-badge"><span class="dot"></span>EARLY SUPPORTER CAMPAIGN — NOW OPEN</div>
   <h1>Back <span>Jarvis Defense</span><br>from the beginning.</h1>
   <p class="hero-sub">Lock in lifetime pricing before launch. Be part of the team that builds autonomous AI cybersecurity for every business.</p>
-  <div class="hero-date">// FIRST ACCESS: JULY 2026 · LIMITED SEATS</div>
+  <div class="hero-date">// FIRST BACKER ACCESS: FIRST WEEK OF JULY 2026 · LIMITED FOUNDER SEATS</div>
   <div class="seats-bar">
     <div class="num">34</div>
     <div class="lbl"><b>Lifetime founder seats</b>Once they're gone, they're gone.</div>
@@ -262,14 +292,14 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-bottom">
           <div class="perk-desc">Your name in the Jarvis Defense founding supporter list. A direct contribution to building the future of autonomous cybersecurity.</div>
-          <button class="perk-btn disabled">Coming Soon</button>
+          <a href="https://buy.stripe.com/3cIcN55CFead3P61Yz4gg06" class="perk-btn" target="_blank" rel="noopener noreferrer">Pay Now</a>
         </div>
       </div>
       <div class="perk-card">
         <div class="perk-top">
           <div>
             <div class="perk-name">Early Access</div>
-            <div class="perk-tagline">Be first in line when Jarvis Defense opens beta.</div>
+            <div class="perk-tagline">Get early product access in the first week of July 2026.</div>
           </div>
           <div class="perk-pricing">
             <div class="perk-price">$49</div>
@@ -282,8 +312,8 @@ footer a{color:var(--amber)}
           </div>
         </div>
         <div class="perk-bottom">
-          <div class="perk-desc">Priority beta access before public launch. Test Jarvis Defense on your own infrastructure and shape the product with direct feedback.</div>
-          <button class="perk-btn disabled">Coming Soon</button>
+          <div class="perk-desc">First-week founder access before the public launch target in September 2026. Test Jarvis Defense early and shape the product with direct feedback during the July-August pilot phase.</div>
+          <a href="https://buy.stripe.com/dRm8wP2qt9TXbhy1Yz4gg05" class="perk-btn" target="_blank" rel="noopener noreferrer">Pay Now</a>
         </div>
       </div>
     </div>
@@ -323,7 +353,7 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-bottom">
           <div class="perk-desc">Web Defense Agent monitors your sites for bots, DDoS, brute force and suspicious traffic. Jarvis sends you a clear morning briefing — no noise, just what matters.</div>
-          <button class="perk-btn disabled">Coming Soon</button>
+          <a href="https://buy.stripe.com/4gMeVd3uxgiletK6eP4gg04" class="perk-btn" target="_blank" rel="noopener noreferrer">Pay Now</a>
         </div>
       </div>
 
@@ -354,7 +384,7 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-bottom">
           <div class="perk-desc">Full AI security coverage for your team. Jarvis monitors web, email, logins and infrastructure — and responds autonomously so your team stays focused on work, not alerts.</div>
-          <button class="perk-btn disabled">Coming Soon</button>
+          <a href="https://buy.stripe.com/4gMeVd2qt5DH5Xe46H4gg03" class="perk-btn" target="_blank" rel="noopener noreferrer">Pay Now</a>
         </div>
       </div>
 
@@ -385,7 +415,7 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-bottom">
           <div class="perk-desc">All Jarvis agents running in parallel — web, email, identity, vulnerability and threat intelligence. Full attack picture, autonomous response, priority support channel.</div>
-          <button class="perk-btn disabled">Coming Soon</button>
+          <a href="https://buy.stripe.com/4gMfZhfdf7LP3P632D4gg02" class="perk-btn" target="_blank" rel="noopener noreferrer">Pay Now</a>
         </div>
       </div>
 
@@ -412,7 +442,7 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-bottom">
           <div class="perk-desc">Enterprise-grade AI security at a fraction of the cost. Custom response playbooks, dedicated onboarding, and the full Jarvis agent network protecting your entire infrastructure.</div>
-          <button class="perk-btn disabled">Coming Soon</button>
+          <a href="https://buy.stripe.com/bJe7sLc139TX85m32D4gg01" class="perk-btn" target="_blank" rel="noopener noreferrer">Pay Now</a>
         </div>
       </div>
 
@@ -440,7 +470,7 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-bottom">
           <div class="perk-desc">One seat. Full Jarvis Defense deployment with custom integrations, SLA agreement, and direct access to the founding team. The most exclusive early supporter deal available.</div>
-          <button class="perk-btn disabled">Coming Soon</button>
+          <a href="https://buy.stripe.com/3cI28r9SVd695Xe8mX4gg00" class="perk-btn" target="_blank" rel="noopener noreferrer">Pay Now</a>
         </div>
       </div>
 
@@ -558,7 +588,7 @@ footer a{color:var(--amber)}
 
     <div class="slide-block">
       <img src="Jarvis_Slide_14.png" alt="Roadmap"/>
-      <p class="slide-caption"><b>Roadmap.</b> First paid accounts in month 4 — not in year 2. Indiegogo backers get immediate access when the first agent goes live. No cold acquisition phase means we move faster than typical security startups.</p>
+      <p class="slide-caption"><b>Roadmap.</b> Founder backers receive first access in the first week of July 2026. The pilot phase runs through July-August 2026, with the public launch targeted for September 2026.</p>
     </div>
 
   </div>
