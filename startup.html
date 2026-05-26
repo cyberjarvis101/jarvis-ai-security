@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Back the Startup — Jarvis Defense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070605;--bg-2:#0c0a08;--panel:#0f0d0b;
+  --line:rgba(255,140,40,.14);--line-strong:rgba(255,140,40,.35);
+  --amber:#ff8c1a;--amber-bright:#ffb347;--amber-deep:#cc5a00;
+  --text:#f5ede2;--muted:#8a8278;--muted-2:#5e574e;
+  --green:#37c66f;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+
+/* ---------- ATMOSPHERIC BG ---------- */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(255,140,26,.08),transparent 70%)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(255,140,26,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,140,26,.04) 1px,transparent 1px);
+  background-size:60px 60px;
+  -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 30%,#000,transparent);
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 30%,#000,transparent)}
+
+/* ---------- NAV ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;
+  border-bottom:1px solid var(--line);
+  background:rgba(7,6,5,.85);backdrop-filter:blur(12px)}
+.nav-inner{max-width:1280px;margin:0 auto;padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:24px}
+.logo{display:flex;align-items:center;gap:10px;
+  font-family:'Syncopate',sans-serif;font-weight:700;letter-spacing:.15em;font-size:14px}
+.logo-mark{width:28px;height:28px;border:2px solid var(--amber);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(255,140,26,.3)}
+.logo-mark::after{content:'';width:8px;height:8px;background:var(--amber);box-shadow:0 0 12px var(--amber)}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--amber-bright)}
+.nav-cta{position:relative;padding:10px 20px;border:1.5px solid var(--amber);
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--text);
+  background:rgba(255,140,26,.08);transition:all .2s}
+.nav-cta::before,.nav-cta::after{content:'';position:absolute;top:0;bottom:0;
+  width:3px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.nav-cta::before{left:-2px}.nav-cta::after{right:-2px}
+.nav-cta:hover{background:rgba(255,140,26,.15)}
+@media(max-width:900px){.nav-links{display:none}}
+
+/* ---------- HERO SECTION ---------- */
+.hero-startup{position:relative;z-index:1;padding:140px 24px 80px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;
+  color:var(--amber);border:1px solid var(--line-strong);
+  background:rgba(255,140,26,.07);padding:8px 16px;margin-bottom:32px}
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);
+  box-shadow:0 0 8px var(--amber);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-startup h1{font-family:'Syncopate',sans-serif;font-size:clamp(32px,6vw,72px);
+  font-weight:700;line-height:1.1;letter-spacing:.04em;color:#fff;margin-bottom:12px}
+.hero-startup h1 span{color:var(--amber)}
+.hero-sub{font-size:18px;color:var(--muted);max-width:640px;margin:0 auto 16px;line-height:1.6}
+.hero-date{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.18em;
+  color:var(--amber-bright);margin-bottom:48px}
+.seats-bar{display:inline-flex;align-items:center;gap:14px;
+  border:1px solid var(--line-strong);padding:12px 24px;background:rgba(255,140,26,.05)}
+.seats-bar .num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600;color:var(--amber)}
+.seats-bar .lbl{font-size:13px;color:var(--muted);text-align:left;line-height:1.4}
+.seats-bar .lbl b{color:var(--text);display:block}
+
+/* ---------- CONTAINER ---------- */
+.container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+/* ---------- SECTION TITLES ---------- */
+.sec-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--amber);display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.sec-label::before{content:'';width:28px;height:2px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.sec-title{font-family:'Syncopate',sans-serif;font-size:clamp(22px,3.5vw,42px);
+  font-weight:700;color:#fff;line-height:1.15;letter-spacing:.03em;margin-bottom:12px}
+.sec-title span{color:var(--amber)}
+.sec-desc{font-size:16px;color:var(--muted);line-height:1.7;max-width:680px}
+
+/* ---------- PERK SECTIONS ---------- */
+.perks-section{padding:80px 0 40px}
+.perks-intro{margin-bottom:56px}
+.perks-grid{display:grid;gap:16px}
+
+/* Lifetime perks */
+.perk-card{position:relative;border:1.5px solid var(--line-strong);
+  background:linear-gradient(135deg,rgba(255,140,26,.08),rgba(255,140,26,.02));
+  padding:28px 32px;transition:all .25s;overflow:hidden}
+.perk-card::before{content:'';position:absolute;left:0;top:0;bottom:0;
+  width:4px;background:var(--amber);box-shadow:0 0 12px var(--amber)}
+.perk-card:hover{border-color:var(--amber);background:rgba(255,140,26,.1);
+  transform:translateY(-2px);box-shadow:0 8px 40px rgba(255,140,26,.15)}
+.perk-card.featured{border-color:var(--amber);
+  background:linear-gradient(135deg,rgba(255,140,26,.13),rgba(255,140,26,.04));
+  box-shadow:0 0 30px rgba(255,140,26,.12)}
+.perk-top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.perk-name{font-family:'Syncopate',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:6px}
+.perk-tagline{font-size:13px;color:var(--muted);line-height:1.5}
+.perk-pricing{text-align:right;flex-shrink:0}
+.perk-price{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:600;color:var(--amber);line-height:1}
+.perk-price .mo{font-size:16px;color:var(--muted);font-weight:400}
+.perk-original{font-family:'JetBrains Mono',monospace;font-size:15px;
+  color:var(--muted-2);text-decoration:line-through;margin-top:4px}
+.perk-save{font-size:13px;color:var(--green);font-weight:600;margin-top:4px}
+.perk-middle{display:flex;align-items:center;gap:32px;margin:20px 0;flex-wrap:wrap}
+.perk-seats{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.16em;
+  color:var(--amber);border:1px solid var(--line-strong);
+  padding:5px 12px;background:rgba(255,140,26,.07)}
+.perk-features{display:flex;flex-wrap:wrap;gap:8px}
+.feat{font-size:12px;color:var(--muted);border:1px solid var(--line);
+  padding:4px 10px;background:rgba(255,255,255,.02)}
+.perk-bottom{margin-top:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.perk-desc{font-size:13px;color:var(--muted);line-height:1.6;max-width:520px}
+.perk-btn{position:relative;padding:13px 28px;border:1.5px solid var(--amber);
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--text);
+  background:rgba(255,140,26,.1);cursor:pointer;white-space:nowrap;
+  transition:all .2s;flex-shrink:0}
+.perk-btn::before,.perk-btn::after{content:'';position:absolute;top:0;bottom:0;
+  width:3px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.perk-btn::before{left:-2px}.perk-btn::after{right:-2px}
+.perk-btn:hover{background:var(--amber);color:var(--bg)}
+.perk-btn.disabled{opacity:.5;cursor:not-allowed;border-color:var(--muted-2)}
+.perk-btn.disabled::before,.perk-btn.disabled::after{background:var(--muted-2);box-shadow:none}
+.sold-badge{display:inline-flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;
+  color:#fff;background:rgba(55,198,111,.15);border:1px solid rgba(55,198,111,.4);
+  padding:4px 10px;border-radius:2px}
+.sold-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.seats-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sold-count{font-family:'JetBrains Mono',monospace;font-size:11px;
+  letter-spacing:.12em;color:var(--green)}
+
+/* Launch perk cards (smaller) */
+.launch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:16px}
+.launch-card{border:1px solid var(--line);background:rgba(255,140,26,.03);
+  padding:22px 20px;transition:all .25s;position:relative;overflow:hidden}
+.launch-card::before{content:'';position:absolute;left:0;top:0;bottom:0;
+  width:3px;background:rgba(255,140,26,.5)}
+.launch-card:hover{border-color:var(--line-strong);background:rgba(255,140,26,.07)}
+.launch-name{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text);margin-bottom:8px}
+.launch-price{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:600;color:var(--amber)}
+.launch-price .mo{font-size:13px;color:var(--muted)}
+.launch-original{font-size:12px;color:var(--muted-2);text-decoration:line-through;margin:4px 0}
+.launch-note{font-size:11px;color:var(--muted);margin:8px 0 14px;line-height:1.5}
+.launch-btn{width:100%;padding:10px;border:1px solid var(--amber);
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--text);background:rgba(255,140,26,.08);
+  cursor:pointer;transition:all .2s}
+.launch-btn:hover{background:var(--amber);color:var(--bg)}
+
+/* Entry perks */
+.entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:40px}
+@media(max-width:600px){.entry-grid{grid-template-columns:1fr}}
+
+/* ---------- DIVIDER ---------- */
+.divider{border:none;border-top:1px solid var(--line);margin:60px 0}
+
+/* ---------- STORY SLIDES ---------- */
+.story-section{padding:60px 0 80px}
+.slide-block{margin-bottom:56px}
+.slide-block img{width:100%;border:1px solid var(--line);
+  box-shadow:0 4px 40px rgba(0,0,0,.5);margin-bottom:20px;display:block}
+.slide-caption{font-size:14px;color:var(--muted);line-height:1.7;max-width:760px}
+.slide-caption b{color:var(--text)}
+
+/* ---------- CTA BOTTOM ---------- */
+.cta-bottom{text-align:center;padding:80px 24px;position:relative;z-index:1}
+.cta-bottom h2{font-family:'Syncopate',sans-serif;font-size:clamp(24px,4vw,48px);
+  font-weight:700;color:#fff;margin-bottom:16px}
+.cta-bottom h2 span{color:var(--amber)}
+.cta-bottom p{font-size:16px;color:var(--muted);max-width:560px;margin:0 auto 40px;line-height:1.7}
+.cta-big{display:inline-flex;align-items:center;gap:12px;position:relative;
+  padding:18px 40px;border:2px solid var(--amber);
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--text);
+  background:rgba(255,140,26,.1);cursor:pointer;transition:all .25s}
+.cta-big::before,.cta-big::after{content:'';position:absolute;top:0;bottom:0;
+  width:5px;background:var(--amber);box-shadow:0 0 14px var(--amber)}
+.cta-big::before{left:-3px}.cta-big::after{right:-3px}
+.cta-big:hover{background:var(--amber);color:var(--bg)}
+.cta-big .arr{font-size:18px}
+
+/* ---------- FOOTER ---------- */
+footer{border-top:1px solid var(--line);padding:32px 24px;text-align:center;position:relative;z-index:1}
+footer p{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--muted-2)}
+footer a{color:var(--amber)}
+
+/* ---------- MOBILE ---------- */
+@media(max-width:768px){
+  .perk-top{flex-direction:column}
+  .perk-pricing{text-align:left}
+  .perk-bottom{flex-direction:column;align-items:flex-start}
+  .perk-btn{width:100%;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo">
+      <span class="logo-mark"></span>
+      <span>JARVIS</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/#demo">Demo</a>
+      <a href="/#vision">Vision</a>
+      <a href="/#how-it-works">How It Works</a>
+    </div>
+    <a href="#packages" class="nav-cta">Back the Startup</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-startup">
+  <div class="hero-badge"><span class="dot"></span>EARLY SUPPORTER CAMPAIGN — NOW OPEN</div>
+  <h1>Back <span>Jarvis Defense</span><br>from the beginning.</h1>
+  <p class="hero-sub">Lock in lifetime pricing before launch. Be part of the team that builds autonomous AI cybersecurity for every business.</p>
+  <div class="hero-date">// FIRST ACCESS: JULY 2026 · LIMITED SEATS</div>
+  <div class="seats-bar">
+    <div class="num">34</div>
+    <div class="lbl"><b>Lifetime founder seats</b>Once they're gone, they're gone.</div>
+  </div>
+</section>
+
+<!-- PACKAGES -->
+<section class="perks-section" id="packages">
+  <div class="container">
+
+    <!-- ENTRY PERKS -->
+    <div class="sec-label">Support the mission</div>
+    <div class="entry-grid">
+      <div class="perk-card">
+        <div class="perk-top">
+          <div>
+            <div class="perk-name">Supporter</div>
+            <div class="perk-tagline">Believe in the mission — no product access required.</div>
+          </div>
+          <div class="perk-pricing">
+            <div class="perk-price">$25</div>
+          </div>
+        </div>
+        <div class="perk-middle">
+          <div class="seats-row">
+            <div class="sold-badge"><span class="dot"></span>7 BACKED</div>
+            <div class="sold-count">Unlimited · open to all</div>
+          </div>
+        </div>
+        <div class="perk-bottom">
+          <div class="perk-desc">Your name in the Jarvis Defense founding supporter list. A direct contribution to building the future of autonomous cybersecurity.</div>
+          <button class="perk-btn disabled">Coming Soon</button>
+        </div>
+      </div>
+      <div class="perk-card">
+        <div class="perk-top">
+          <div>
+            <div class="perk-name">Early Access</div>
+            <div class="perk-tagline">Be first in line when Jarvis Defense opens beta.</div>
+          </div>
+          <div class="perk-pricing">
+            <div class="perk-price">$49</div>
+          </div>
+        </div>
+        <div class="perk-middle">
+          <div class="seats-row">
+            <div class="sold-badge"><span class="dot"></span>5 BACKED</div>
+            <div class="sold-count">Unlimited · open to all</div>
+          </div>
+        </div>
+        <div class="perk-bottom">
+          <div class="perk-desc">Priority beta access before public launch. Test Jarvis Defense on your own infrastructure and shape the product with direct feedback.</div>
+          <button class="perk-btn disabled">Coming Soon</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIFETIME PERKS -->
+    <div class="sec-label" style="margin-top:48px">Lifetime founder pricing — 40% off forever</div>
+    <div class="sec-title">Lock in your price. <span>Keep it for life.</span></div>
+    <p class="sec-desc" style="margin-bottom:40px">Back Jarvis Defense now and secure your subscription price permanently. Your lifetime founder pricing stays with you through any restructuring — and can be transferred if you sell your company.</p>
+
+    <div class="perks-grid">
+
+      <!-- WEB -->
+      <div class="perk-card featured">
+        <div class="perk-top">
+          <div>
+            <div class="perk-name">Jarvis Web — Lifetime</div>
+            <div class="perk-tagline">For websites, online businesses and solo founders.</div>
+          </div>
+          <div class="perk-pricing">
+            <div class="perk-price">$119<span class="mo">/mo</span></div>
+            <div class="perk-original">$199/mo</div>
+            <div class="perk-save">Save $960/year · forever</div>
+          </div>
+        </div>
+        <div class="perk-middle">
+          <div class="seats-row">
+            <div class="perk-seats">// 14 SEATS REMAINING</div>
+            <div class="sold-badge"><span class="dot"></span>1 SOLD</div>
+          </div>
+          <div class="perk-features">
+            <span class="feat">Up to 3 sites</span>
+            <span class="feat">5 users</span>
+            <span class="feat">Web Defense Agent</span>
+            <span class="feat">Threat Intel</span>
+            <span class="feat">Morning Briefing</span>
+          </div>
+        </div>
+        <div class="perk-bottom">
+          <div class="perk-desc">Web Defense Agent monitors your sites for bots, DDoS, brute force and suspicious traffic. Jarvis sends you a clear morning briefing — no noise, just what matters.</div>
+          <button class="perk-btn disabled">Coming Soon</button>
+        </div>
+      </div>
+
+      <!-- BUSINESS -->
+      <div class="perk-card">
+        <div class="perk-top">
+          <div>
+            <div class="perk-name">Jarvis Business — Lifetime</div>
+            <div class="perk-tagline">For companies and digital teams up to 20 employees.</div>
+          </div>
+          <div class="perk-pricing">
+            <div class="perk-price">$599<span class="mo">/mo</span></div>
+            <div class="perk-original">$999/mo</div>
+            <div class="perk-save">Save $4,800/year · forever</div>
+          </div>
+        </div>
+        <div class="perk-middle">
+          <div class="seats-row">
+            <div class="perk-seats">// 9 SEATS REMAINING</div>
+            <div class="sold-badge"><span class="dot"></span>1 SOLD</div>
+          </div>
+          <div class="perk-features">
+            <span class="feat">Up to 20 employees</span>
+            <span class="feat">Web + Email agents</span>
+            <span class="feat">Vulnerability scan</span>
+            <span class="feat">Identity protection</span>
+          </div>
+        </div>
+        <div class="perk-bottom">
+          <div class="perk-desc">Full AI security coverage for your team. Jarvis monitors web, email, logins and infrastructure — and responds autonomously so your team stays focused on work, not alerts.</div>
+          <button class="perk-btn disabled">Coming Soon</button>
+        </div>
+      </div>
+
+      <!-- GROWTH -->
+      <div class="perk-card">
+        <div class="perk-top">
+          <div>
+            <div class="perk-name">Jarvis Growth — Lifetime</div>
+            <div class="perk-tagline">For growing companies up to 50 employees.</div>
+          </div>
+          <div class="perk-pricing">
+            <div class="perk-price">$1,500<span class="mo">/mo</span></div>
+            <div class="perk-original">$2,500/mo</div>
+            <div class="perk-save">Save $12,000/year · forever</div>
+          </div>
+        </div>
+        <div class="perk-middle">
+          <div class="seats-row">
+            <div class="perk-seats">// 3 SEATS REMAINING</div>
+            <div class="sold-badge"><span class="dot"></span>2 SOLD</div>
+          </div>
+          <div class="perk-features">
+            <span class="feat">Up to 50 employees</span>
+            <span class="feat">All agents active</span>
+            <span class="feat">Advanced correlation</span>
+            <span class="feat">Priority support</span>
+          </div>
+        </div>
+        <div class="perk-bottom">
+          <div class="perk-desc">All Jarvis agents running in parallel — web, email, identity, vulnerability and threat intelligence. Full attack picture, autonomous response, priority support channel.</div>
+          <button class="perk-btn disabled">Coming Soon</button>
+        </div>
+      </div>
+
+      <!-- SCALE -->
+      <div class="perk-card">
+        <div class="perk-top">
+          <div>
+            <div class="perk-name">Jarvis Scale — Lifetime</div>
+            <div class="perk-tagline">For SMB and mid-market up to 100 employees.</div>
+          </div>
+          <div class="perk-pricing">
+            <div class="perk-price">$3,000<span class="mo">/mo</span></div>
+            <div class="perk-original">$5,000/mo</div>
+            <div class="perk-save">Save $24,000/year · forever</div>
+          </div>
+        </div>
+        <div class="perk-middle">
+          <div class="perk-seats">// 3 SEATS AVAILABLE</div>
+          <div class="perk-features">
+            <span class="feat">Up to 100 employees</span>
+            <span class="feat">Custom response playbooks</span>
+            <span class="feat">Dedicated onboarding</span>
+          </div>
+        </div>
+        <div class="perk-bottom">
+          <div class="perk-desc">Enterprise-grade AI security at a fraction of the cost. Custom response playbooks, dedicated onboarding, and the full Jarvis agent network protecting your entire infrastructure.</div>
+          <button class="perk-btn disabled">Coming Soon</button>
+        </div>
+      </div>
+
+      <!-- ENTERPRISE -->
+      <div class="perk-card">
+        <div class="perk-top">
+          <div>
+            <div class="perk-name">Jarvis Enterprise — Lifetime</div>
+            <div class="perk-tagline">Custom protection and integrations for 100+ employees.</div>
+          </div>
+          <div class="perk-pricing">
+            <div class="perk-price">$6,000<span class="mo">/mo</span></div>
+            <div class="perk-original">$10,000/mo</div>
+            <div class="perk-save">Save $48,000/year · forever</div>
+          </div>
+        </div>
+        <div class="perk-middle">
+          <div class="perk-seats">// 1 SEAT AVAILABLE</div>
+          <div class="perk-features">
+            <span class="feat">100+ employees</span>
+            <span class="feat">Custom integrations</span>
+            <span class="feat">Direct founder access</span>
+            <span class="feat">SLA agreement</span>
+          </div>
+        </div>
+        <div class="perk-bottom">
+          <div class="perk-desc">One seat. Full Jarvis Defense deployment with custom integrations, SLA agreement, and direct access to the founding team. The most exclusive early supporter deal available.</div>
+          <button class="perk-btn disabled">Coming Soon</button>
+        </div>
+      </div>
+
+    </div><!-- /perks-grid -->
+
+    <!-- LAUNCH PERKS -->
+    <div style="margin-top:56px">
+      <div class="sec-label">Launch deals — available when lifetime seats sell out</div>
+      <div class="sec-title">Lifetime seats filling up. <span>Launch deal is next.</span></div>
+      <p class="sec-desc" style="margin-bottom:28px">Once all 34 lifetime founder seats are gone, Launch deals open. Same 40% discount — locked for 18 months from your activation date. After that, renews at standard pricing.</p>
+      <div class="launch-grid">
+        <div class="launch-card">
+          <div class="launch-name">Web Launch</div>
+          <div class="launch-price">$99<span class="mo">/mo</span></div>
+          <div class="launch-original">$199/mo</div>
+          <div class="launch-note">40% off · 18 months<br>1–3 sites · 5 users</div>
+          <button class="launch-btn" disabled>Coming Soon</button>
+        </div>
+        <div class="launch-card">
+          <div class="launch-name">Business Launch</div>
+          <div class="launch-price">$299<span class="mo">/mo</span></div>
+          <div class="launch-original">$999/mo</div>
+          <div class="launch-note">40% off · 18 months<br>Up to 20 employees</div>
+          <button class="launch-btn" disabled>Coming Soon</button>
+        </div>
+        <div class="launch-card">
+          <div class="launch-name">Growth Launch</div>
+          <div class="launch-price">$499<span class="mo">/mo</span></div>
+          <div class="launch-original">$2,500/mo</div>
+          <div class="launch-note">40% off · 18 months<br>Up to 50 employees</div>
+          <button class="launch-btn" disabled>Coming Soon</button>
+        </div>
+        <div class="launch-card">
+          <div class="launch-name">Scale Launch</div>
+          <div class="launch-price">$799<span class="mo">/mo</span></div>
+          <div class="launch-original">$5,000/mo</div>
+          <div class="launch-note">40% off · 18 months<br>Up to 100 employees</div>
+          <button class="launch-btn" disabled>Coming Soon</button>
+        </div>
+        <div class="launch-card">
+          <div class="launch-name">Enterprise Launch</div>
+          <div class="launch-price">$999<span class="mo">/mo</span></div>
+          <div class="launch-original">$10,000/mo</div>
+          <div class="launch-note">40% off · 18 months<br>100+ employees</div>
+          <button class="launch-btn" disabled>Coming Soon</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- STORY SECTION -->
+<section class="story-section">
+  <div class="container">
+    <div class="sec-label">The full story</div>
+    <div class="sec-title" style="margin-bottom:48px">Why we're building <span>Jarvis Defense.</span></div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_02.png" alt="Vision"/>
+      <p class="slide-caption"><b>Our Vision.</b> Not another dashboard. An autonomous AI security operator — where specialized agents monitor, analyze and act under one central intelligence, 24/7.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_03.png" alt="Problem"/>
+      <p class="slide-caption"><b>The Problem.</b> 63% of CEOs cite limited budgets as the main barrier to cyber resilience. 56% name the skills shortage. Meanwhile attackers now use AI to accelerate phishing, malware and exploits — and SMBs are left exposed.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_04.png" alt="Solution"/>
+      <p class="slide-caption"><b>Our Solution.</b> Specialized security agents feed signals into Central Jarvis — which correlates, decides, and triggers autonomous response. Jarvis sees the full attack picture, not isolated events.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_05.png" alt="Architecture"/>
+      <p class="slide-caption"><b>Product Architecture.</b> MVP launches with Web Defense, Vulnerability & Patch, and Threat Intelligence agents. Phase 2 adds Email Security, Identity & Login, and Cloud / Infrastructure agents.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_06.png" alt="Why Now"/>
+      <p class="slide-caption"><b>Why Now.</b> Microsoft, CrowdStrike, Palo Alto and SentinelOne are all moving toward agentic security — but targeting enterprise. Jarvis Defense owns the underserved SMB layer with a simpler product and lower price.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_07.png" alt="Market"/>
+      <p class="slide-caption"><b>The Market.</b> $248B global cybersecurity market growing to $699B by 2034. The AI-in-cybersecurity segment is $35.4B. Even 3% of that is a $1B+ opportunity — and we're entering bottom-up through SMBs.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_08.png" alt="Traction"/>
+      <p class="slide-caption"><b>We're not starting cold.</b> ~4M monthly content views, ~40K monthly visits to CyberTools4u, ~10K cybersecurity-focused followers. We have a direct, low-cost channel to our exact target customer.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_09.png" alt="Business Model"/>
+      <p class="slide-caption"><b>Business Model.</b> Recurring SaaS revenue from $199/mo (Web) to $10,000+/mo (Enterprise). Land with website protection, expand to full AI security coverage as companies grow.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_10.png" alt="Competitive Landscape"/>
+      <p class="slide-caption"><b>Competitive Landscape.</b> Every major player targets enterprise. Jarvis Defense is the autonomous AI security operator built specifically for SMBs and digital businesses without a security team.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_11.png" alt="Go-to-Market"/>
+      <p class="slide-caption"><b>Go-to-Market.</b> Founder distribution via CyberTools4u → public launch campaign → pilot customers → paid SaaS. An owned audience means no cold acquisition phase.</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_12.png" alt="Team"/>
+      <p class="slide-caption"><b>The Team.</b> Andrejs Dudarevs (Founder & CEO) — B.S. Cybersecurity from SANS Technology Institute, GIAC GPEN, GIAC GCIH, 5+ years Red Team & Blue Team. Artems Lappo (AI Agents Lead) — building security-focused AI agents in production since the technology emerged. Marina Perevodchikova (Marketing & Growth Lead).</p>
+    </div>
+
+    <div class="slide-block">
+      <img src="Jarvis_Slide_14.png" alt="Roadmap"/>
+      <p class="slide-caption"><b>Roadmap.</b> First paid accounts in month 4 — not in year 2. Indiegogo backers get immediate access when the first agent goes live. No cold acquisition phase means we move faster than typical security startups.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA BOTTOM -->
+<section class="cta-bottom">
+  <h2>Be part of the <span>beginning.</span></h2>
+  <p>Only 34 lifetime founder seats available. Your lifetime founder pricing stays with you through any restructuring — and can be transferred to another business if you sell your company.</p>
+  <button class="cta-big" onclick="document.getElementById('packages').scrollIntoView({behavior:'smooth'})">
+    <span>See All Packages</span>
+    <span class="arr">→</span>
+  </button>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 JARVIS DEFENSE · <a href="/">jarvisdefense.io</a> · <a href="mailto:hello@jarvisdefense.io">hello@jarvisdefense.io</a></p>
+</footer>
+
+</body>
+</html>
