@@ -282,7 +282,70 @@ footer a{color:var(--amber)}
 }
 
 
-/* ---------- SLIDE LIGHTBOX ---------- */
+/* ---------- FUNDING PROGRESS BAR ---------- */
+.funding-bar-wrap{
+  display:inline-block;
+  margin-top:20px;
+  min-width:min(540px,90vw);
+  border:1px solid var(--line-strong);
+  background:rgba(255,140,26,.05);
+  padding:18px 22px;
+  text-align:left;
+}
+.funding-bar-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:.28em;
+  text-transform:uppercase;
+  color:var(--amber);
+  margin-bottom:10px;
+}
+.funding-bar-amounts{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  margin-bottom:8px;
+}
+.funding-bar-raised{
+  font-family:'JetBrains Mono',monospace;
+  font-size:20px;
+  font-weight:600;
+  color:var(--text);
+}
+.funding-bar-raised span{
+  color:var(--amber);
+}
+.funding-bar-target{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  letter-spacing:.1em;
+}
+.funding-bar-track{
+  width:100%;
+  height:6px;
+  background:rgba(255,140,26,.12);
+  border:1px solid rgba(255,140,26,.2);
+  position:relative;
+  overflow:hidden;
+}
+.funding-bar-fill{
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:62%; /* 465000/750000 = 62% */
+  background:var(--amber);
+  box-shadow:0 0 10px var(--amber);
+}
+.funding-bar-note{
+  margin-top:7px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:.08em;
+  color:var(--muted-2);
+  line-height:1.5;
+}
+
+
 .slide-block img{
   cursor:zoom-in;
 }
@@ -372,6 +435,19 @@ footer a{color:var(--amber)}
     <div class="num">34</div>
     <div class="lbl"><b>Lifetime founder seats</b>Once they're gone, they're gone.</div>
   </div>
+
+  <div class="funding-bar-wrap">
+    <div class="funding-bar-label">// Funding Progress</div>
+    <div class="funding-bar-amounts">
+      <div class="funding-bar-raised"><span>$465,000</span> raised</div>
+      <div class="funding-bar-target">of $750,000 target</div>
+    </div>
+    <div class="funding-bar-track">
+      <div class="funding-bar-fill"></div>
+    </div>
+    <div class="funding-bar-note">Raised from private investors. Not from reservation payments on this page.</div>
+  </div>
+
 </section>
 
 <!-- PACKAGES -->
@@ -393,7 +469,7 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-middle">
           <div class="seats-row">
-            <div class="sold-badge"><span class="dot"></span>7 BACKED</div>
+            <div class="sold-badge"><span class="dot"></span>33 BACKED</div>
             <div class="sold-count">Unlimited · open to all</div>
           </div>
         </div>
@@ -415,7 +491,7 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-middle">
           <div class="seats-row">
-            <div class="sold-badge"><span class="dot"></span>5 BACKED</div>
+            <div class="sold-badge"><span class="dot"></span>21 BACKED</div>
             <div class="sold-count">Unlimited · open to all</div>
           </div>
         </div>
@@ -454,8 +530,8 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-middle">
           <div class="seats-row">
-            <div class="perk-seats">// 14 SEATS REMAINING</div>
-            <div class="sold-badge"><span class="dot"></span>1 SOLD</div>
+            <div class="perk-seats">// 12 SEATS REMAINING</div>
+            <div class="sold-badge"><span class="dot"></span>3 SOLD</div>
           </div>
           <div class="perk-features">
             <span class="feat">Up to 3 sites</span>
@@ -488,8 +564,8 @@ footer a{color:var(--amber)}
         </div>
         <div class="perk-middle">
           <div class="seats-row">
-            <div class="perk-seats">// 9 SEATS REMAINING</div>
-            <div class="sold-badge"><span class="dot"></span>1 SOLD</div>
+            <div class="perk-seats">// 8 SEATS REMAINING</div>
+            <div class="sold-badge"><span class="dot"></span>2 SOLD</div>
           </div>
           <div class="perk-features">
             <span class="feat">Up to 20 employees</span>
@@ -691,7 +767,7 @@ footer a{color:var(--amber)}
 
     <div class="slide-block">
       <img src="Jarvis_Slide_09.png" alt="Business Model"/>
-      <p class="slide-caption"><b>Business Model.</b> Recurring SaaS revenue from $199/mo (Web) to $10,000+/mo (Enterprise). Land with website protection, expand to full AI security coverage as companies grow.</p>
+      <p class="slide-caption"><b>Business Model.</b> Jarvis Defense is a recurring SaaS product after launch — from $199/mo (Jarvis Web) to $10,000+/mo (Enterprise). These are the official post-launch monthly prices. Current startup page payments are one-time reservation payments: founder backers reserve discounted lifetime pricing before launch. No subscription starts today. After Jarvis Defense launches, reserved founder pricing activates for the selected plan. Land with website protection, then expand the same customer into full AI security coverage.</p>
     </div>
 
     <div class="slide-block">
@@ -710,8 +786,13 @@ footer a{color:var(--amber)}
     </div>
 
     <div class="slide-block">
+      <img src="Jarvis_Slide_13.png" alt="Ask / Use of Funds"/>
+      <p class="slide-caption"><b>Ask / Use of Funds.</b> Raising <b style="color:var(--amber)">$750,000</b> to build Jarvis Defense v1 and launch the first pilot phase. This backing helps us build Jarvis Defense v1, deliver first backer access in the first week of July 2026, run the July–August 2026 pilot phase, and prepare for the September 2026 public launch target. Use of funds is focused on: AI agent development, security engineering, infrastructure and testing, pilot onboarding, and product launch and growth. <em>Note: $465,000 has already been raised from private investors. This funding round covers the remaining capital needed to reach launch.</em></p>
+    </div>
+
+    <div class="slide-block">
       <img src="Jarvis_Slide_14.png" alt="Roadmap"/>
-      <p class="slide-caption"><b>Roadmap.</b> Founder backers receive first access in the first week of July 2026. The pilot phase runs through July-August 2026, with the public launch targeted for September 2026.</p>
+      <p class="slide-caption"><b>Roadmap — A faster path from first access to paid pilots.</b> Core Build: Jarvis Defense v1, first agent layer, dashboards, and onboarding flow. First week of July 2026: founder backers receive first access. July–August 2026: early users and selected companies test the first Jarvis workflows in the pilot phase. September 2026: public launch target after the pilot phase. After launch: paid SaaS rollout begins and founder pricing activates for reserved founder seats. Why this is faster: Jarvis Defense launches with an existing CyberTools4u audience and direct access to cybersecurity-focused users. No cold acquisition phase.</p>
     </div>
 
   </div>
