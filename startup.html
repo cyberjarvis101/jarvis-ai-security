@@ -405,6 +405,13 @@ footer a{color:var(--amber)}
 }
 
 </style>
+<script>
+  // ----------- CLEAN STARTUP URL -----------
+  if (window.location.pathname.endsWith('/startup.html')) {
+    window.history.replaceState(null, '', '/startup');
+  }
+</script>
+
 </head>
 <body>
 
@@ -767,7 +774,7 @@ footer a{color:var(--amber)}
 
     <div class="slide-block">
       <img src="Jarvis_Slide_09.png" alt="Business Model"/>
-      <p class="slide-caption"><b>Business Model.</b> Jarvis Defense is a recurring SaaS product after launch — from $199/mo (Jarvis Web) to $10,000+/mo (Enterprise). These are the official post-launch monthly prices. Current startup page payments are one-time reservation payments: founder backers reserve discounted lifetime pricing before launch. No subscription starts today. After Jarvis Defense launches, reserved founder pricing activates for the selected plan. Land with website protection, then expand the same customer into full AI security coverage.</p>
+      <p class="slide-caption"><b>Business Model.</b> Jarvis Defense becomes a recurring SaaS product after launch, with official monthly plans from $199/mo for web protection to $10,000+/mo for enterprise coverage. The model starts with website protection and expands into full AI security coverage as customers grow.</p>
     </div>
 
     <div class="slide-block">
